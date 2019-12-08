@@ -101,9 +101,9 @@ export default {
       if (!this.markers.length) return [];
       if (!this.alerts.length) return [];
 
-      const markers = [...this.markers];
+      const markers = this.markers.map(item => ({ ...item, priority: 0 }));
 
-      this.markers.forEach((alert) => {
+      this.alerts.forEach((alert) => {
         for (let i = 0; i < markers.length; i += 1) {
           const currentMarker = markers[i];
           const distance = Number(getDistanceFromLatLon(
@@ -113,24 +113,29 @@ export default {
             Number(alert.lon),
           ).toFixed(0));
 
-          if (distance < 300 && !currentMarker.hasChanged) {
+          if (distance < 300) {
             markers[i] = {
               ...currentMarker,
               pin: PIN.RED,
             };
-            markers[i].hasChanged = true;
-          } else if (distance <= 400 && distance >= 300 && !currentMarker.hasChanged) {
+            markers[i].priority = 1;
+          }
+
+          if (distance <= 400 && distance >= 300
+            && (markers[i].priority === 0 || markers[i].priority > 2)) {
             markers[i] = {
               ...currentMarker,
               pin: PIN.YELLOW,
             };
-            markers[i].hasChanged = true;
-          } else if (distance > 400 && !currentMarker.hasChanged) {
+            markers[i].priority = 2;
+          }
+
+          if (distance > 400 && (markers[i].priority === 0 || markers[i].priority === 3)) {
             markers[i] = {
               ...currentMarker,
               pin: PIN.GREEN,
             };
-            markers[i].hasChanged = true;
+            markers[i].priority = 3;
           }
         }
       });
@@ -186,7 +191,7 @@ export default {
       this.markers = response.map(marker => ({
         ...marker,
         pin: PIN.GREEN,
-        hasChanged: false,
+        priority: 0,
         coords: {
           lat: Number(marker.lat),
           lng: Number(marker.lon),
