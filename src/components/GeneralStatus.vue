@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p class="text-h6 text-grey-7 text-weight-bold q-mb-md">
+    <p class="text-h6 text-grey-7 text-family-bold q-mb-md">
       Informações gerais
     </p>
 
@@ -11,19 +11,19 @@
 
     <div class="row q-mt-lg" v-else>
       <div class="col justify-center">
-        <p class="text-h5 q-ma-none text-center text-primary text-weight-bold">
+        <p class="text-h5 q-ma-none text-center text-primary text-family-bold">
           {{ info.shipsPublicPort }}
         </p>
         <p class="text-grey-7 text-body2 text-center">Navios no porto público</p>
       </div>
       <div class="col justify-center">
-        <p class="text-h5 q-ma-none text-center text-primary text-weight-bold">
+        <p class="text-h5 q-ma-none text-center text-primary text-family-bold">
           {{ info.shipsTerminals }}
         </p>
         <p class="text-grey-7 text-body2 text-center">Navios no terminal</p>
       </div>
       <div class="col justify-center">
-        <p class="text-h5 q-ma-none text-center text-primary text-weight-bold">
+        <p class="text-h5 q-ma-none text-center text-primary text-family-bold">
           {{ info.shipsExpected }}
         </p>
         <p class="text-grey-7 text-body2 text-center">Navios experados</p>

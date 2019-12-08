@@ -2,7 +2,7 @@
   <q-page class="fit">
     <gmap-map
       :center="{ lat: -23.9760793, lng: -46.3221415 }"
-      :zoom="15"
+      :zoom="13"
       map-type-id="terrain"
        :options="{
         zoomControl: true,
@@ -51,17 +51,29 @@
         :position="marker.coords"
         :clickable="true"
       />
+
+      <gmap-polygon
+        v-for="(terminal, index) in terminals"
+        :key="`polygon-${index}`"
+        :options="{
+          fillColor: 'black',
+          fillOpacity: 0.6,
+          strokeColor: 'black'
+        }"
+        :path="terminal" />
     </gmap-map>
   </q-page>
 </template>
 
 <script>
+import terminals from '../utils/terminals';
 import PIN from '../utils/pin';
 
 export default {
   name: 'PageIndex',
   data() {
     return {
+      terminals: terminals.map(terminal => terminal.pos),
       markers: [
         {
           pin: PIN.RED,
@@ -79,7 +91,8 @@ export default {
       height: `${window.innerHeight - 50}px`,
     };
   },
-  methods: {
+  mounted() {
+    console.log(this.terminals);
   },
 };
 </script>

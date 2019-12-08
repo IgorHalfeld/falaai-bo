@@ -1,7 +1,7 @@
 <template>
   <div class="fit q-pa-md">
     <general-status class="q-mb-lg"/>
-    <p class="text-h6 text-grey-7 text-weight-bold q-mb-md">
+    <p class="text-h6 text-grey-7 text-family-bold q-mb-md">
       Legenda
     </p>
     <ul style="list-style: none" class="q-pa-none">

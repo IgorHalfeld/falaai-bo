@@ -2,8 +2,8 @@
   <q-layout view="hHh lpR fFf">
     <q-header elevated class="bg-white">
       <q-toolbar>
-        <q-toolbar-title class="text-grey-8 text-weight-bold">
-          fala<span class="text-weight-light">.ai</span>
+        <q-toolbar-title class="text-grey-8 text-family-bold">
+          fala<span class="MontserratLight">.ai</span>
         </q-toolbar-title>
 
         <div>
@@ -11,9 +11,9 @@
             <img src="https://avatars3.githubusercontent.com/u/9022134?s=100&v=4" alt="avatar">
           </q-avatar>
           <q-menu auto-close>
-            <p class="text-grey-7 text-body2 text-weight-light q-ma-md">
+            <p class="text-grey-7 text-body2 MontserratLight q-ma-md">
               Loggado como
-              <span class="text-weight-bold text-underline">
+              <span class="text-family-bold text-underline">
                 Igor Halfeld
               </span>
             </p>
