@@ -1,6 +1,6 @@
 export default httpClient => ({
   getTotalizers: async () => {
-    const { data: response } = await httpClient.get('listartotalizadores');
+    const { data: response } = await httpClient.get('general');
     const {
       PesquisarTotalizadoresResult,
     } = response;

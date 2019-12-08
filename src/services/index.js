@@ -2,7 +2,7 @@ import axios from 'axios';
 import GeneralService from './general';
 
 const generalHttpClient = axios.create({
-  baseURL: 'http://aplicacoes.portodesantos.com.br:9104/siap/servicos/atracacao/siteweb/',
+  baseURL: 'https://falaai-api.azurewebsites.net/',
   headers: {
     Host: 'aplicacoes.portodesantos.com.br:9104',
     Origin: 'http://www.portodesantos.com.br',
