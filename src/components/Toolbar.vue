@@ -1,55 +1,44 @@
 <template>
-  <div class="fit q-pa-md">
-    <general-status class="q-mb-lg"/>
-    <p class="text-h6 text-grey-7 text-family-bold q-mb-md">
-      Legenda
-    </p>
-    <ul style="list-style: none" class="q-pa-none">
-      <li
-        class="flex items-center text-grey-7 q-my-sm text-body1"
-        v-for="item in colors" :key="item.label">
-        <img
-          v-if="item.image"
-          :src="item.image"
-          class="q-mr-md"
-          :style="{
-            borderRadius: '50%',
-            width: '20px',
-            height: '20px',
-            transform: 'scale(1.2, 1.2)'
-          }"
-        />
-        <span
-          v-else
-          class="q-mr-md"
-          :class="item.color"
-          :style="{
-            borderRadius: '50%',
-            width: '20px',
-            height: '20px',
-          }">
-        </span>
-        {{ item.label }}
-      </li>
-    </ul>
-  </div>
+  <component :is="component" />
 </template>
 
 <script>
-import PIN from '../utils/pin';
-import GeneralStatus from './GeneralStatus';
+import { mapState } from 'vuex';
+import ToolbarLegend from './ToolbarLegend';
+import ToolbarAlert from './ToolbarAlert';
+import ToolbarShip from './ToolbarShip';
+import LegendShip from './LegendShip';
+import LegendAlert from './LegendAlert';
+import { modes } from '../store';
 
 export default {
   name: 'Toolbar',
-  components: { GeneralStatus },
+  components: {
+    LegendShip,
+    LegendAlert,
+    ToolbarLegend,
+    ToolbarAlert,
+    ToolbarShip,
+  },
   data: () => ({
-    colors: [
-      { label: 'Cículo - Ocorências', color: 'bg-black' },
-      { label: 'Cículo - Região das ocorrências', color: 'bg-red-4' },
-      { label: 'Navio - Não afetado', image: PIN.GREEN },
-      { label: 'Navio - Requer atenção', image: PIN.YELLOW },
-      { label: 'Navio - Perigo!', image: PIN.RED },
-    ],
+    component: 'ToolbarLegend',
   }),
+  computed: mapState({
+    mode: state => state.mode,
+  }),
+  watch: {
+    mode() {
+      if (this.mode === modes.alertDetail) {
+        this.component = 'ToolbarAlert';
+        this.$forceUpdate();
+      } else if (this.mode === modes.shipDetail) {
+        this.component = 'ToolbarShip';
+        this.$forceUpdate();
+      } else {
+        this.component = 'ToolbarLegend';
+        this.$forceUpdate();
+      }
+    },
+  },
 };
 </script>

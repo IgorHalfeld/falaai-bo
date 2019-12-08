@@ -41,8 +41,7 @@ export default {
   }),
   async mounted() {
     this.isLoading = true;
-    const { data: response } = await this.$s.general.getTotalizers();
-    this.info = response;
+
     this.isLoading = false;
   },
 };

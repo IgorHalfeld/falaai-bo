@@ -1,10 +1,9 @@
 <template>
   <q-page class="fit">
     <gmap-map
-      :center="{ lat: -23.9760793, lng: -46.3221415 }"
+      :center="{ lat: -23.9535596, lng: -46.2819004 }"
       :zoom="13"
-      map-type-id="terrain"
-       :options="{
+      :options="{
         zoomControl: true,
         mapTypeControl: false,
         scaleControl: false,
@@ -20,6 +19,7 @@
     >
       <!-- main alert -->
       <gmap-circle
+        v-if="alerts[0]"
         :center="alerts[0].coords"
         :radius="1000"
         :options="{
@@ -29,17 +29,29 @@
           fillColor: '#e57373'
         }"
       />
+      <!-- alert -->
       <gmap-circle
         v-for="(alert, index) in alerts"
-        :key="`alert-${index}`"
+        :key="`alert-circle-${index}`"
         :center="alert.coords"
-        :radius="100"
+        :radius="400"
+        @click="() => checkAlert(alert)"
         :options="{
-          strokeColor: 'transparent',
-          strokeWeight: 2,
-          opacity: 0.5,
-          fillColor: 'black'
+          strokeColor: 'green',
+          opacity: 0.6,
+          fillColor: 'green'
         }"
+      />
+      <gmap-marker
+        v-for="(alert, index) in alerts"
+        :key="`alert-marker-${index}`"
+        @click="() => checkAlert(alert)"
+        :icon="{
+          url: types[alert.type],
+          scaledSize: { width: 40, height: 40 }
+        }"
+        :position="alert.coords"
+        :clickable="true"
       />
       <gmap-marker
         v-for="(marker, index) in markers"
@@ -56,42 +68,43 @@
       <gmap-polygon
         v-for="(terminal, index) in terminals"
         :key="`polygon-${index}`"
+        @click="showTerminalDesc(terminal)"
         :options="{
-          fillColor: 'black',
+          fillColor: 'purple',
           fillOpacity: 0.6,
-          strokeColor: 'black'
+          strokeColor: 'purple'
         }"
-        :path="terminal" />
+        :path="terminal.pos" />
     </gmap-map>
   </q-page>
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+import { getDistanceFromLatLon } from '../utils/helpers';
 import { parseFirebaseResponse } from '../boot/fb';
 import terminals from '../utils/terminals';
 import PIN from '../utils/pin';
 
 let ships = [];
 
+const types = {
+  'Incêndio ou explosão': '/statics/icones_dash00.png',
+  'Vazamento químico': '/statics/icones_dash01.png',
+  'Pessoa acidentada': '/statics/icones_dash02.png',
+  'Poluição ambiental': '/statics/icones_dash03.png',
+  'Desabamento estrutura': '/statics/icones_dash04.png',
+  'Embarcação c/ problema': '/statics/icones_dash05.png',
+};
+
 export default {
   name: 'PageIndex',
   data() {
     return {
-      terminals: terminals.map(terminal => terminal.pos),
-      markers: [
-        // {
-        //   pin: PIN.RED,
-        //   coords: { lat: -23.978550, lng: -46.325403 },
-        // },
-        // {
-        //   pin: PIN.GREEN,
-        //   coords: { lat: -23.971804, lng: -46.336818 },
-        // },
-      ],
-      alerts: [
-        { coords: { lat: -23.978550, lng: -46.325403 } },
-        { coords: { lat: -23.975256, lng: -46.327506 } },
-      ],
+      terminals: terminals.map(terminal => terminal),
+      types,
+      markers: [],
+      alerts: [],
       height: `${window.innerHeight - 50}px`,
     };
   },
@@ -99,19 +112,83 @@ export default {
     this.$q.loading.show();
     await this.fetchShips();
 
-    const ref = await this.$fb.database().ref('ships');
-    ref.on('value', (result) => {
+    const [
+      alertRef,
+      shipRef,
+    ] = await Promise.all([
+      this.$fb.database().ref('alerts'),
+      this.$fb.database().ref('ships'),
+    ]);
+
+    const handleResponse = (result) => {
+      const alerts = parseFirebaseResponse(result);
+      this.alerts = alerts.map((alert) => {
+        if (this.markers.length) {
+          for (let i = 0; i < this.markers.length; i += 1) {
+            const currentMarker = this.markers[i];
+            const distance = getDistanceFromLatLon(
+              currentMarker.coords.lat,
+              currentMarker.coords.lng,
+              Number(alert.lat),
+              Number(alert.lon),
+            );
+
+            if (Number(distance.toFixed(0)) <= 800 && Number(distance.toFixed(0)) >= 300) {
+              this.markers[i] = {
+                ...currentMarker,
+                pin: PIN.YELLOW,
+              };
+              console.log('this.markers[i]', this.markers[i]);
+              // this.$$forceUpdate();
+            } else if (Number(distance.toFixed(0)) < 300) {
+              this.markers[i] = {
+                ...currentMarker,
+                pin: PIN.RED,
+              };
+            } else {
+              this.markers[i] = {
+                ...currentMarker,
+                pin: PIN.GREEN,
+              };
+            }
+          }
+        }
+
+        return {
+          ...alert,
+          coords: {
+            lat: Number(alert.lat),
+            lng: Number(alert.lon),
+          },
+        };
+      });
+      this.setAlerts(alerts);
+      this.$q.loading.hide();
+    };
+
+    alertRef.on('child_moved', handleResponse);
+    alertRef.on('child_added', handleResponse);
+    alertRef.on('child_removed', handleResponse);
+    alertRef.on('child_changed', handleResponse);
+    alertRef.on('value', handleResponse);
+
+
+    shipRef.on('value', (result) => {
       ships = parseFirebaseResponse(result);
       this.$q.loading.hide();
     });
-    setInterval(this.fetchShips, 5000);
+    // setInterval(this.fetchShips, 5000);
   },
   methods: {
+    ...mapActions(['setAlerts', 'setMode', 'setCurrentShip']),
+    showTerminalDesc(terminal) {
+      this.$q.notify(terminal.name);
+    },
     async fetchShips() {
       const { data: response } = await this.$s.ships.getShips();
       this.markers = response.map(marker => ({
         ...marker,
-        pin: PIN.BLACK,
+        pin: PIN.GREEN,
         coords: {
           lat: Number(marker.lat),
           lng: Number(marker.lon),
@@ -119,12 +196,20 @@ export default {
       }));
       this.$forceUpdate();
     },
+    checkAlert(alert) {
+      this.setMode('ALERT_DETAIL');
+      this.setCurrentShip(alert);
+    },
     checkInfo(marker) {
       const found = ships.find(
         ({ ship }) => ship === marker.ship_name,
       );
 
-      console.log('marker', found);
+      this.setMode('SHIP_DETAIL');
+      this.setCurrentShip({
+        ...found,
+        ...marker,
+      });
     },
   },
 };

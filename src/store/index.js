@@ -1,24 +1,43 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-// import example from './module-example'
-
 Vue.use(Vuex);
 
-/*
- * If not building with SSR mode, you can
- * directly export the Store instantiation
- */
+export const modes = {
+  legend: 'LEGEND',
+  alertDetail: 'ALERT_DETAIL',
+  shipDetail: 'SHIP_DETAIL',
+};
 
 export default function (/* { ssrContext } */) {
   const Store = new Vuex.Store({
-    modules: {
-      // example
+    state: {
+      mode: 'LEGEND',
+      currentShip: {},
+      alerts: [],
     },
-
-    // enable strict mode (adds overhead!)
-    // for dev mode only
-    strict: process.env.DEV,
+    actions: {
+      setCurrentShip({ commit }, payload) {
+        commit('SET_CURRENT_SHIP', payload);
+      },
+      setMode({ commit }, payload) {
+        commit('SET_MODE', payload);
+      },
+      setAlerts({ commit }, payload) {
+        commit('SET_ALERTS', payload);
+      },
+    },
+    mutations: {
+      SET_CURRENT_SHIP: (state, payload) => {
+        state.currentShip = payload;
+      },
+      SET_ALERTS: (state, payload) => {
+        state.alerts = payload;
+      },
+      SET_MODE: (state, payload) => {
+        state.mode = payload;
+      },
+    },
   });
 
   return Store;
