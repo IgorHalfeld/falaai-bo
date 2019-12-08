@@ -2,7 +2,7 @@
   <q-page class="fit">
     <gmap-map
       :center="{ lat: -23.9535596, lng: -46.2819004 }"
-      :zoom="13"
+      :zoom="14"
       :options="{
         zoomControl: true,
         mapTypeControl: false,
@@ -17,18 +17,6 @@
         height: height
       }"
     >
-      <!-- main alert -->
-      <gmap-circle
-        v-if="alerts[0]"
-        :center="alerts[0].coords"
-        :radius="1000"
-        :options="{
-          strokeColor: 'transparent',
-          strokeOpacity: 0.8,
-          opacity: 0.5,
-          fillColor: '#e57373'
-        }"
-      />
       <!-- alert -->
       <gmap-circle
         v-for="(alert, index) in alerts"
@@ -37,9 +25,9 @@
         :radius="400"
         @click="() => checkAlert(alert)"
         :options="{
-          strokeColor: 'green',
+          strokeColor: 'red',
           opacity: 0.6,
-          fillColor: 'green'
+          fillColor: 'red'
         }"
       />
       <gmap-marker
@@ -54,7 +42,7 @@
         :clickable="true"
       />
       <gmap-marker
-        v-for="(marker, index) in markers"
+        v-for="(marker, index) in markersParsed"
         :key="`marker-${index}`"
         @click="() => checkInfo(marker)"
         :icon="{
@@ -108,6 +96,48 @@ export default {
       height: `${window.innerHeight - 50}px`,
     };
   },
+  computed: {
+    markersParsed() {
+      if (!this.markers.length) return [];
+      if (!this.alerts.length) return [];
+
+      const markers = [...this.markers];
+
+      this.markers.forEach((alert) => {
+        for (let i = 0; i < markers.length; i += 1) {
+          const currentMarker = markers[i];
+          const distance = Number(getDistanceFromLatLon(
+            currentMarker.coords.lat,
+            currentMarker.coords.lng,
+            Number(alert.lat),
+            Number(alert.lon),
+          ).toFixed(0));
+
+          if (distance < 300 && !currentMarker.hasChanged) {
+            markers[i] = {
+              ...currentMarker,
+              pin: PIN.RED,
+            };
+            markers[i].hasChanged = true;
+          } else if (distance <= 400 && distance >= 300 && !currentMarker.hasChanged) {
+            markers[i] = {
+              ...currentMarker,
+              pin: PIN.YELLOW,
+            };
+            markers[i].hasChanged = true;
+          } else if (distance > 400 && !currentMarker.hasChanged) {
+            markers[i] = {
+              ...currentMarker,
+              pin: PIN.GREEN,
+            };
+            markers[i].hasChanged = true;
+          }
+        }
+      });
+
+      return markers;
+    },
+  },
   async mounted() {
     this.$q.loading.show();
     await this.fetchShips();
@@ -122,46 +152,13 @@ export default {
 
     const handleResponse = (result) => {
       const alerts = parseFirebaseResponse(result);
-      this.alerts = alerts.map((alert) => {
-        if (this.markers.length) {
-          for (let i = 0; i < this.markers.length; i += 1) {
-            const currentMarker = this.markers[i];
-            const distance = getDistanceFromLatLon(
-              currentMarker.coords.lat,
-              currentMarker.coords.lng,
-              Number(alert.lat),
-              Number(alert.lon),
-            );
-
-            if (Number(distance.toFixed(0)) <= 800 && Number(distance.toFixed(0)) >= 300) {
-              this.markers[i] = {
-                ...currentMarker,
-                pin: PIN.YELLOW,
-              };
-              console.log('this.markers[i]', this.markers[i]);
-              // this.$$forceUpdate();
-            } else if (Number(distance.toFixed(0)) < 300) {
-              this.markers[i] = {
-                ...currentMarker,
-                pin: PIN.RED,
-              };
-            } else {
-              this.markers[i] = {
-                ...currentMarker,
-                pin: PIN.GREEN,
-              };
-            }
-          }
-        }
-
-        return {
-          ...alert,
-          coords: {
-            lat: Number(alert.lat),
-            lng: Number(alert.lon),
-          },
-        };
-      });
+      this.alerts = alerts.map(alert => ({
+        ...alert,
+        coords: {
+          lat: Number(alert.lat),
+          lng: Number(alert.lon),
+        },
+      }));
       this.setAlerts(alerts);
       this.$q.loading.hide();
     };
@@ -177,7 +174,7 @@ export default {
       ships = parseFirebaseResponse(result);
       this.$q.loading.hide();
     });
-    // setInterval(this.fetchShips, 5000);
+    setInterval(this.fetchShips, 5000);
   },
   methods: {
     ...mapActions(['setAlerts', 'setMode', 'setCurrentShip']),
@@ -189,6 +186,7 @@ export default {
       this.markers = response.map(marker => ({
         ...marker,
         pin: PIN.GREEN,
+        hasChanged: false,
         coords: {
           lat: Number(marker.lat),
           lng: Number(marker.lon),
