@@ -44,7 +44,7 @@ export default {
   components: { GeneralStatus },
   data: () => ({
     colors: [
-      { label: 'Cículo - Occorências', color: 'bg-black' },
+      { label: 'Cículo - Ocorências', color: 'bg-black' },
       { label: 'Cículo - Região das ocorrências', color: 'bg-red-4' },
       { label: 'Navio - Não afetado', image: PIN.GREEN },
       { label: 'Navio - Requer atenção', image: PIN.YELLOW },

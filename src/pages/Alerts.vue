@@ -44,6 +44,7 @@
       <gmap-marker
         v-for="(marker, index) in markers"
         :key="`marker-${index}`"
+        @click="() => checkInfo(marker)"
         :icon="{
           url: marker.pin,
           scaledSize: { width: 40, height: 40 }
@@ -66,9 +67,11 @@
 </template>
 
 <script>
-// import { parseFirebaseResponse } from '../boot/fb';
+import { parseFirebaseResponse } from '../boot/fb';
 import terminals from '../utils/terminals';
 import PIN from '../utils/pin';
+
+let ships = [];
 
 export default {
   name: 'PageIndex',
@@ -76,14 +79,14 @@ export default {
     return {
       terminals: terminals.map(terminal => terminal.pos),
       markers: [
-        {
-          pin: PIN.RED,
-          coords: { lat: -23.978550, lng: -46.325403 },
-        },
-        {
-          pin: PIN.GREEN,
-          coords: { lat: -23.971804, lng: -46.336818 },
-        },
+        // {
+        //   pin: PIN.RED,
+        //   coords: { lat: -23.978550, lng: -46.325403 },
+        // },
+        // {
+        //   pin: PIN.GREEN,
+        //   coords: { lat: -23.971804, lng: -46.336818 },
+        // },
       ],
       alerts: [
         { coords: { lat: -23.978550, lng: -46.325403 } },
@@ -93,13 +96,36 @@ export default {
     };
   },
   async mounted() {
-    /*
+    this.$q.loading.show();
+    await this.fetchShips();
+
     const ref = await this.$fb.database().ref('ships');
     ref.on('value', (result) => {
-      const response = parseFirebaseResponse(result);
-      console.log('result', response);
+      ships = parseFirebaseResponse(result);
+      this.$q.loading.hide();
     });
-    */
+    setInterval(this.fetchShips, 5000);
+  },
+  methods: {
+    async fetchShips() {
+      const { data: response } = await this.$s.ships.getShips();
+      this.markers = response.map(marker => ({
+        ...marker,
+        pin: PIN.BLACK,
+        coords: {
+          lat: Number(marker.lat),
+          lng: Number(marker.lon),
+        },
+      }));
+      this.$forceUpdate();
+    },
+    checkInfo(marker) {
+      const found = ships.find(
+        ({ ship }) => ship === marker.ship_name,
+      );
+
+      console.log('marker', found);
+    },
   },
 };
 </script>
