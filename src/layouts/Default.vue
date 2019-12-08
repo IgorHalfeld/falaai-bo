@@ -1,14 +1,17 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <q-header elevated class="bg-white">
+    <q-header elevated class="bg-dark shadow-4">
       <q-toolbar>
-        <q-toolbar-title class="text-grey-8 text-family-bold">
-          fala<span class="MontserratLight">.ai</span>
+        <q-toolbar-title class="text-grey-8 text-family-bold flex items-center">
+          <img src="~assets/logo.png" width="80" alt="">
         </q-toolbar-title>
 
         <div>
           <q-avatar>
-            <img src="https://avatars3.githubusercontent.com/u/9022134?s=100&v=4" alt="avatar">
+            <img
+              class="cursor-pointer border"
+              src="https://avatars3.githubusercontent.com/u/9022134?s=100&v=4"
+              alt="avatar">
           </q-avatar>
           <q-menu auto-close>
             <p class="text-grey-7 text-body2 MontserratLight q-ma-md">
@@ -30,7 +33,7 @@
       side="right"
       overlay
       bordered
-      content-class="bg-grey-1"
+      content-class="bg-white q-pt-md"
     >
       <toolbar />
     </q-drawer>

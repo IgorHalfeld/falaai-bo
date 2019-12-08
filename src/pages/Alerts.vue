@@ -66,6 +66,7 @@
 </template>
 
 <script>
+// import { parseFirebaseResponse } from '../boot/fb';
 import terminals from '../utils/terminals';
 import PIN from '../utils/pin';
 
@@ -91,8 +92,14 @@ export default {
       height: `${window.innerHeight - 50}px`,
     };
   },
-  mounted() {
-    console.log(this.terminals);
+  async mounted() {
+    /*
+    const ref = await this.$fb.database().ref('ships');
+    ref.on('value', (result) => {
+      const response = parseFirebaseResponse(result);
+      console.log('result', response);
+    });
+    */
   },
 };
 </script>
