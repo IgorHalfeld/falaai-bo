@@ -40,13 +40,13 @@
       <p class="text-body1 text-grey-7 q-mb-md">
         Localização
       </p>
-      <div class="row">
+      <div class="col">
         <div class="col">
-          <span class="text-h4 text-grey-8 text-family-bold">{{ currentShip.lat }}</span>
+          <span class="text-h5 text-grey-8 text-family-bold">{{ currentShip.lat }}</span>
           <p class="text-h6 text-grey-8 q-ma-none">Latitude</p>
         </div>
         <div class="col">
-          <span class="text-h4 text-grey-8 text-family-bold">{{ currentShip.lon }}</span>
+          <span class="text-h5 text-grey-8 text-family-bold">{{ currentShip.lon }}</span>
           <p class="text-h6 text-grey-8 q-ma-none">Longitude</p>
         </div>
       </div>
